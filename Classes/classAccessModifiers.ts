@@ -1,24 +1,23 @@
-// to run the script uncomment the block and run "npm run script -- ./Classes/interfacesOnClasses.ts"
+// to run the script uncomment the block and run "npm run script -- ./Classes/classAccessModifiers.ts"
 
-// *** --- IMPLEMENTING INTERFACES ON CLASSES --- ***
+// *** --- Class Access Modifiers --- ***
 
 // "namespace" is only used so declarations are not shared across related files.
-namespace InterfacesOnClasses {
+namespace ClassAccessModifiers {
   enum Sizes {
     small,
     medium = "medium",
     large = "large",
   }
 
-  // Create an interface with the required fields to make something "Emailable"
   interface Emailable {
-    emailBody(): string; // Even methods type can be described
+    emailBody(): string;
     emailSubject(): string;
   }
 
   class InventoryItem {
     name: string;
-    price: number;
+    readonly price: number; // You can read the price anytime, but can not modify it outside of the class "InventoryItem"
 
     constructor(name: string, price: number) {
       this.name = name;
@@ -31,12 +30,50 @@ namespace InterfacesOnClasses {
     }
   }
 
+  // Visibility modifiers or access modifiers allow us to define visibility of our class properties or methods.
+
+  // ALL access modifiers only exists at compile time.
+
+  // default visibility is "public". This means we can get and set those properties from outside the class or method. Both the property "color" and "size" will have the same visibility. (see below example)
+
+  // class Product extends InventoryItem {
+  //   public color: string = "gray";
+  //   size: Sizes | undefined;
+  // }
+
+  // The access modifier "protected" will only allow access to said properties and methods from the parent class or method. (see class "GreenProduct")
+
+  // class Product extends InventoryItem {
+  //   protected color: string = "gray";
+  //   protected size: Sizes | undefined;
+  // }
+
+  // class GreenProduct extends Product {
+  //   constructor(name: string, price: number) {
+  //     super(name, price)
+  //     this.color = 'green'
+  //   }
+  // }
+
+  // "private" means that the property is ONLY accessible in the current class. This includes not being available in child classes.
+
+  // class Product extends InventoryItem {
+  //   private color: string = "gray";
+  //   protected size: Sizes | undefined;
+  // }
+
+  // class GreenProduct extends Product {
+  //   constructor(name: string, price: number) {
+  //     super(name, price)
+  //     this.color = 'green' // Since "color" has the visibility of "protected" this will throw an error
+  //   }
+  // }
+
   class Product extends InventoryItem {
     color: string = "gray";
     size: Sizes | undefined;
   }
 
-  // By implementing "Emailable" we are promising to provide the "Service" class everything it needs to make a "Service" "Emailable".
   class Service extends InventoryItem implements Emailable {
     startTime: Date;
     endTime: Date;
@@ -47,7 +84,6 @@ namespace InterfacesOnClasses {
       this.endTime = endTime;
     }
 
-    // Since we and "implemented" the "Emailable interface we need to set the required properties of "emailBody" and "emailSubject"
     emailBody(): string {
       return `Thank you for purchasing ${this.name}. Your appointment is from ${this.startTime} - ${this.endTime}`;
     }
@@ -57,7 +93,6 @@ namespace InterfacesOnClasses {
     }
   }
 
-  // We can even create a method using the interface "Emailable" to be sure we will have the properties needed to successfully send an email.
   function sendEmail(emailObj: Emailable, sendTo: string) {
     console.log(`To: ${sendTo}`);
     console.log("Subject:", emailObj.emailSubject());
@@ -78,10 +113,6 @@ namespace InterfacesOnClasses {
 
   photoShoot.buy(); // logs 450
 
-  // An error will be thrown because "tshirt" is a "Product" and Product does not extend "Emailable". This means TypeScript knows that we can not promise to have all required fields since the "emailObj" argument in the method "sendEmail()" is declared to have an "Emailable" argument.
-  // sendEmail(tshirt, 'daniel@vueschool.io')
-
-  // This method will not throw an error because "photoShoot" is a "Service" and Service extends the required "Emailable" argument.
   sendEmail(photoShoot, "daniel@vueschool.io");
   // log:
   // To: daniel@vueschool.io
